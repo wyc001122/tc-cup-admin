@@ -1,0 +1,136 @@
+/* stylelint-disable function-name-case */
+/* stylelint-disable function-no-unknown */
+@use "./normalize.scss" as *;
+@use "element-plus/theme-chalk/src/mixins/function.scss" as *;
+@use "./element-plus/index.scss" as *;
+@use "./transition.scss" as *;
+@use "./rounded.scss" as *;
+@use "./nprogress.scss" as *;
+@use "./vxe/index.scss" as *;
+
+* {
+  outline: none;
+}
+
+html {
+  overflow: auto;
+}
+
+body {
+  height: 100vh;
+  margin: 0;
+  overflow: hidden auto;
+  font-family: getCssVar("font-family");
+  font-size: getCssVar("font-size", "base");
+  line-height: 1.58;
+  color: getCssVar("text-color", "primary");
+  -webkit-tap-highlight-color: rgb(0 0 0 / 0%);
+}
+
+/* 色弱模式 */
+.ele-admin-weak {
+  filter: invert(0.8);
+}
+
+/* 按钮加图标减少间距 */
+.ele-btn-icon.el-button,
+.ele-btn-icon.el-button.is-round {
+  padding-right: 12px;
+  padding-left: 12px;
+
+  & > .el-icon {
+    margin-right: -2px;
+    margin-left: -2px;
+  }
+
+  &.el-button--small {
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+
+  &.el-button--large {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+}
+
+/* 级联选择器增加高度 */
+.ele-popper-higher .el-cascader-menu__wrap.el-scrollbar__wrap {
+  height: 280px;
+}
+
+/* 间距组件样式优化 */
+.el-space--horizontal > .el-space__item:last-child {
+  margin-right: 0 !important;
+}
+
+.el-space--vertical > .el-space__item:last-child {
+  padding-bottom: 0 !important;
+}
+
+/* echarts */
+.echarts > div > div {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* 小屏幕时分页去掉一些组件 */
+@media screen and (width <= 768px) {
+  .ele-pro-table .el-pagination {
+    .el-pagination__sizes,
+    .el-pagination__jump {
+      display: none;
+    }
+  }
+}
+
+/* 表单验证气泡形式 */
+.pro-form-error-popper.el-form-item > .el-form-item__content {
+  & > .el-form-item__error {
+    position: absolute;
+    top: auto;
+    bottom: calc(100% + 3px);
+    left: 0;
+    z-index: 999;
+    width: max-content;
+    padding: 4px 6px;
+    font-size: 12px;
+    color: #fff;
+    background: getCssVar("color-danger");
+    border-radius: 3px;
+    transition: all 0.2s;
+    transform: none;
+
+    &::after {
+      position: absolute;
+      bottom: -7px;
+      left: 8px;
+      content: "";
+      border: 4px solid transparent;
+      border-top-color: getCssVar("color-danger");
+    }
+  }
+}
+
+/* 暗黑模式切换过渡 */
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation: none;
+}
+
+::view-transition-old(root) {
+  z-index: 2147483646;
+}
+
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+.dark::view-transition-old(root) {
+  z-index: 1;
+}
+
+.dark::view-transition-new(root) {
+  z-index: 2147483646;
+}

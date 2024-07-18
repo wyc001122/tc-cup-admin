@@ -1,0 +1,40 @@
+@use "./light.scss" as *;
+@use "./dark.scss" as *;
+
+// 表头背景color
+.el-table th.el-table__cell {
+  background-color: var(--el-fill-color-lighter) !important;
+}
+
+// 表头文字color
+.el-table thead {
+  color: var(--el-text-color-primary) !important;
+}
+
+// hover 表格行
+.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+  background-color: var(--el-fill-color-lighter) !important;
+}
+
+html.rounded {
+  // dialog 圆角
+  .el-dialog {
+    --el-dialog-border-radius: 8px !important;
+  }
+
+  // 表头 圆角
+  .el-table__inner-wrapper > .el-table__header-wrapper,
+  .el-table--border > .el-table__inner-wrapper::after,
+  .el-table--border.hide-header > .el-table__inner-wrapper > .el-table__body-wrapper,
+  .el-table--layout-auto:not(.hide-header) > .el-table__inner-wrapper > .el-table__body-wrapper {
+    border-top-left-radius: var(--el-border-radius-base);
+    border-top-right-radius: var(--el-border-radius-base);
+  }
+}
+
+// number input
+.el-input-number .el-input-number__increase,
+.el-input-number .el-input-number__decrease {
+  top: 1px;
+  bottom: 1px;
+}

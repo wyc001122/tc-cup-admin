@@ -1,0 +1,16 @@
+@use "./light.scss" as *;
+@use "./dark.scss" as *;
+
+html.rounded {
+  .vxe-table--render-default.border--default .vxe-table--header-wrapper,
+  .vxe-table--render-default.border--full .vxe-table--header-wrapper,
+  .vxe-table--render-default.border--outer .vxe-table--header-wrapper {
+    background-color: var(--el-fill-color-lighter) !important;
+    border-top-left-radius: var(--el-border-radius-base);
+    border-top-right-radius: var(--el-border-radius-base);
+  }
+}
+
+.vxe-table--render-default .vxe-table--border-line {
+  border: none !important;
+}
