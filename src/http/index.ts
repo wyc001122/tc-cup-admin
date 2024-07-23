@@ -23,7 +23,6 @@ const api = axios.create({
 const WHITE_LIST = ['/cup-auth/oauth/token']
 
 /** 是否正在刷新token,如果正在刷新 */
-
 api.interceptors.request.use(async (config) => {
   isLoading.value = true
   config.headers.Authorization = AUTHORIZATION
@@ -37,6 +36,9 @@ api.interceptors.request.use(async (config) => {
 
 api.interceptors.response.use((response) => {
   isLoading.value = false
+  if (response.data.code !== 200 && response.config.url !== '/cup-auth/oauth/token') {
+    ElMessage.error(response.data.msg)
+  }
   return Promise.resolve(response.data)
 }, (err) => {
   isLoading.value = false

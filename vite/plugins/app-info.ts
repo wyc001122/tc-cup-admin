@@ -11,7 +11,7 @@ export default function appInfo(): Plugin {
 
       console.log(
         boxen(
-          `${bold(green(`${bgGreen('tc-admin')} 后台管理系统`))}`,
+          `${bold(green(`${bgGreen('tc-cup-admin')} 后台管理系统`))}`,
           {
             padding: 1,
             margin: 1,

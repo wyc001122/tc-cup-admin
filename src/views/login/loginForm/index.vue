@@ -49,24 +49,26 @@ function submit() {
         password: md5(form.value.password),
       }
       loginApi(params).then((res) => {
-        WujieVue.bus.$emit('loginByUsername', res)
-        ElMessage.success('登录成功')
+        if (res) {
+          WujieVue.bus.$emit('loginByUsername', res)
+          ElMessage.success('登录成功')
 
-        saveTenantId(form.value.tenant_id)
+          saveTenantId(form.value.tenant_id)
 
-        if (form.value.remember === true) {
-          lastLoginData.value = {
-            tenant_id: form.value.tenant_id,
-            username: form.value.username,
-            password: form.value.password,
-            remember: form.value.remember,
+          if (form.value.remember === true) {
+            lastLoginData.value = {
+              tenant_id: form.value.tenant_id,
+              username: form.value.username,
+              password: form.value.password,
+              remember: form.value.remember,
+            }
           }
+          else {
+            lastLoginData.value = {}
+          }
+          setCupToken(res)
+          router.push(redirect.value)
         }
-        else {
-          lastLoginData.value = {}
-        }
-        setCupToken(res)
-        router.push(redirect.value)
       }).finally(() => {
         loading.value = false
       })
@@ -105,8 +107,9 @@ function submit() {
       <el-input
         v-model="form.password"
         autocomplete="new-password"
-        show-password
+
         clearable
+        show-password
         placeholder="请输入密码"
         tabindex="3"
         :prefix-icon="Lock"

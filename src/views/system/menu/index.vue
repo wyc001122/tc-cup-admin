@@ -11,6 +11,7 @@ import type { VxeTableInstance } from 'vxe-table'
 import { useClipboard } from '@vueuse/core'
 import type { FormInstance, FormRules } from 'element-plus'
 import { filterTree, eachTree } from '@/utils/common-utils'
+import useUserStore from '@/store/modules/user'
 
 const {
   copy,
@@ -18,8 +19,9 @@ const {
 } = useClipboard()
 
 /** 权限 */
-const permissions = usePermissions()
+const userStore = useUserStore()
 const permissionList = computed(() => {
+  const permissions = userStore.permissions
   return {
     addBtn: permissions['system:menu:add'],
     delBtn: permissions['system:menu:del'],
@@ -28,22 +30,28 @@ const permissionList = computed(() => {
   }
 })
 
-interface SearchForm {
+interface SearchFormType {
   /** 关键字 */
   keywords?: string
   /** 是否保留父级 */
   withParents?: boolean
 }
 
-const searchForm = ref<SearchForm>({})
+/** 搜索 */
+const searchForm = ref<SearchFormType>({
+  keywords: '',
+  withParents: true,
+})
 
 /** 过滤数据Function */
 const filterHandler = useFilterData(searchForm)
 
 /** 接口返回数据 */
+type MenuListType = ExtractAxiosRes<typeof menu_list>['data']
+type MenuDataType = ExtractAxiosRes<typeof menu_detail>['data']
 const loading = ref(false)
-const tableData = ref<ExtractAxiosData<typeof menu_list>>([])
-const id2Parent = ref<any>({})
+const tableData = ref<MenuListType>([])
+const id2Parent = ref<{ [key: string]: MenuDataType }>({})
 /** 获取数据 */
 function getTableData() {
   loading.value = true
@@ -60,10 +68,11 @@ function getTableData() {
 /** 过滤后的数据 */
 const filterTableData = computed(() => filterHandler(tableData.value))
 const widthoutBtnTableData = computed(() => {
+  const cloneData = JSON.parse(JSON.stringify(tableData.value))
   const topItem = [{
     id: '0',
     name: '顶级节点',
-    children: filterTree(JSON.parse(JSON.stringify(tableData.value)), (item: any) => item.category === 0),
+    children: filterTree(cloneData, (item: any) => item.category !== 2),
   }]
   return topItem
 })
@@ -104,6 +113,7 @@ const formRules = ref<FormRules>({
 const dialogInfo = ref({
   visible: false,
   title: '新增',
+  type: 'add',
 })
 const formRef = ref<FormInstance>()
 watch(() => dialogInfo.value.visible, (value) => {
@@ -114,13 +124,20 @@ watch(() => dialogInfo.value.visible, (value) => {
 /** 新增 */
 function addRow() {
   // 默认值
-  const defaultSort = tableData.value[tableData.value.length - 1]?.sort ?? 0
+  let maxSort = 0
+  const root_child = tableData.value
+  if (root_child && root_child.length > 0) {
+    maxSort = root_child[root_child.length - 1]?.sort ?? 0
+  }
   formData.value = {
     ...DEFAULT_DATA.ADD,
-    sort: defaultSort + 1,
+    sort: maxSort + 1,
   }
-  dialogInfo.value.title = '新增节点'
-  dialogInfo.value.visible = true
+  dialogInfo.value = {
+    visible: true,
+    title: '新增节点',
+    type: 'add',
+  }
 }
 
 /** 编辑 */
@@ -128,27 +145,36 @@ function editRow(row: any) {
   menu_detail({ id: row.id }).then((res) => {
     if (res.code === 200) {
       formData.value = res.data
-      dialogInfo.value.title = '编辑节点'
-      dialogInfo.value.visible = true
+      dialogInfo.value = {
+        visible: true,
+        title: '编辑节点',
+        type: 'edit',
+      }
     }
   })
 }
 
 /** 添加子项 */
 function addSonRow(row: any) {
-  dialogInfo.value.title = '新增节点'
   const _path = row.path
-  const defaultSort = row.children[row.children.length - 1]?.sort ?? 0
+  let maxSort = 0
+  if (row.children && row.children.length > 0) {
+    maxSort = row.children[row.children.length - 1]?.sort ?? 0
+  }
 
   formData.value = {
     ...DEFAULT_DATA.ADDSON,
     parentId: row.id,
-    sort: defaultSort + 1,
+    sort: maxSort + 1,
     path: _path.endsWith('/index')
       ? _path.split('/index')[0]
       : _path,
   }
-  dialogInfo.value.visible = true
+  dialogInfo.value = {
+    visible: true,
+    title: '新增节点',
+    type: 'add',
+  }
 }
 
 /** 批量删除 */
@@ -165,7 +191,7 @@ function deleteRow(rows: any) {
   rows = Array.isArray(rows) ? rows : [rows]
   const _ids = rows.map((item: any) => item.id)
   const _idsString = _ids.join(',')
-  ElMessageBox.confirm('确定将选择数据删除?', '提示', {
+  ElMessageBox.confirm(rows.length > 1 ? `确定将选择的${rows.length}条数据删除?` : '确定将选择数据删除?', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',
@@ -195,6 +221,7 @@ function submitHandler() {
           ElMessage.success(res.msg)
 
           dialogInfo.value.visible = false
+
           getTableData()
         }
       })
@@ -202,30 +229,24 @@ function submitHandler() {
   })
 }
 
-function parentIdChange(value: any) {
+function parentIdChange(value: string) {
   const parent = id2Parent.value[value]
-  let defaultSort
-  if (parent) {
-    defaultSort = parent.children[parent.children.length - 1]?.sort ?? 0
+  const children = parent?.children
+  let maxSort = 0
+  if (parent && children) {
+    maxSort = children[children.length - 1]?.sort ?? 0
   }
   else {
-    defaultSort = tableData.value[tableData.value.length - 1]?.sort ?? 0
+    maxSort = tableData.value[tableData.value.length - 1]?.sort ?? 0
   }
-  formData.value.sort = defaultSort + 1
+  formData.value.sort = maxSort + 1
 }
 
 function categoryChange(value: any) {
-  if (value === 0) {
-    // 菜单:保持 showLink === true isOpen === 0
+  if (value === 0 || value === 2) {
+    // 菜单、按钮 字段固定值
     formData.value.showLink = true
     formData.value.isOpen = 0
-  }
-  else if (value === 1) {
-    // 页面:保持
-
-  }
-  else if (value === 2) {
-    // 按钮:保持
   }
 }
 
@@ -246,8 +267,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <ele-page :flex-table="true">
-    <ele-card :body-style="{ paddingBottom: '2px' }">
+  <TablePage>
+    <template #search>
       <el-form :model="searchForm" label-suffix="：" label-width="100px">
         <el-form-item label="关键字" prop="keywords">
           <el-input v-model="searchForm.keywords" placeholder="请输入菜单名称或路由地址" clearable style="width: 400px;">
@@ -259,106 +280,110 @@ onMounted(() => {
           </el-input>
         </el-form-item>
       </el-form>
-    </ele-card>
-    <ele-card :flex-table="true">
-      <ele-page :plain="true" class="m-b-[20px]">
-        <el-button v-if="permissionList.addBtn" :icon="Plus" type="primary" @click="addRow">
-          新 增
-        </el-button>
-        <el-button v-if="permissionList.delBtn" :icon="Delete" type="danger" @click="batchDelHandler">
-          批量删除
-        </el-button>
-        <el-button :icon="ArrowDown" @click="expandAll">
-          展开全部
-        </el-button>
-        <el-button :icon="ArrowUp" @click="collapseAll">
-          收起全部
-        </el-button>
-      </ele-page>
-      <ele-page :flex-table="true" :plain="true">
-        <vxe-table
-          ref="tableRef"
-          height="auto"
-          :loading="loading"
-          :data="filterTableData"
-          :row-config="{ useKey: true }"
-          :column-config="{ resizable: false, useKey: true }"
-          :tree-config="{}"
-          :expand-config="{ reserve: true }"
-          :show-overflow="true"
-          :checkbox-config="{ labelField: 'name', checkStrictly: true }"
-        >
-          <vxe-column
-            type="checkbox"
-            field="name"
-            title="节点名称"
-            min-width="250"
-            tree-node
-          >
-            <template #default="{ row }">
-              <span>
-                <SvgIcon
-                  v-if="row.source"
-                  :name="row.source"
-                  style=" margin-right: 4px;vertical-align: text-bottom;"
-                  size="19px"
-                />
-                <span v-html="row.name" />
-              </span>
-            </template>
-          </vxe-column>
-          <vxe-column
-            title="路由地址"
-            field="path"
-            type="html"
-            min-width="80"
-          />
-          <vxe-column
-            title="权限标识"
-            field="code"
-            type="html"
-            min-width="80"
-          />
-          <vxe-column
-            title="排序"
-            field="sort"
-            min-width="100"
-            align="center"
-          />
-          <vxe-column title="操作" header-align="center" width="160">
-            <template #default="{ row }">
-              <div class="flex gap-[10px]">
-                <el-link
-                  v-if="permissionList.editBtn"
-                  :underline="false"
-                  type="primary"
-                  @click="editRow(row)"
-                >
-                  编辑
-                </el-link>
-                <el-link
-                  v-if="permissionList.editBtn"
-                  :underline="false"
-                  type="primary"
-                  @click="addSonRow(row)"
-                >
-                  添加子项
-                </el-link>
-                <el-link
-                  v-if="permissionList.delBtn"
-                  :underline="false"
-                  type="info"
-                  @click="deleteRow(row)"
-                >
-                  删除
-                </el-link>
-              </div>
-            </template>
-          </vxe-column>
-        </vxe-table>
-      </ele-page>
-    </ele-card>
-    <ele-modal v-model="dialogInfo.visible" form :title="dialogInfo.title" width="500px">
+    </template>
+    <template #tool>
+      <el-button v-if="permissionList.addBtn" :icon="Plus" type="primary" @click="addRow">
+        新 增
+      </el-button>
+      <el-button v-if="permissionList.delBtn" :icon="Delete" type="danger" @click="batchDelHandler">
+        批量删除
+      </el-button>
+      <el-button :icon="ArrowDown" @click="expandAll">
+        展开全部
+      </el-button>
+      <el-button :icon="ArrowUp" @click="collapseAll">
+        收起全部
+      </el-button>
+    </template>
+    <vxe-table
+      ref="tableRef"
+      height="auto"
+      :loading="loading"
+      :data="filterTableData"
+      :row-config="{ useKey: true }"
+      :column-config="{ resizable: false, useKey: true }"
+      :tree-config="{}"
+      :expand-config="{ reserve: true }"
+      :show-overflow="true"
+      :checkbox-config="{ labelField: 'name', checkStrictly: true }"
+    >
+      <vxe-column
+        type="checkbox"
+        field="name"
+        title="节点名称"
+        min-width="250"
+        tree-node
+      >
+        <template #default="{ row }">
+          <span>
+            <SvgIcon
+              v-if="row.source"
+              :name="row.source"
+              style=" margin-right: 4px;vertical-align: text-bottom;"
+              size="19px"
+            />
+            <span v-html="row.name" />
+          </span>
+        </template>
+      </vxe-column>
+      <vxe-column
+        title="路由地址"
+        field="path"
+        type="html"
+        min-width="80"
+      />
+      <vxe-column
+        title="权限标识"
+        field="code"
+        type="html"
+        min-width="80"
+      />
+      <vxe-column
+        title="排序"
+        field="sort"
+        width="100"
+        align="center"
+      />
+      <vxe-column title="操作" align="center" width="170">
+        <template #default="{ row }">
+          <DividerGroup>
+            <el-link
+              v-if="permissionList.editBtn"
+              :underline="false"
+              type="primary"
+              @click="editRow(row)"
+            >
+              编辑
+            </el-link>
+            <el-link
+              v-if="permissionList.editBtn && row.category !== 2"
+              :underline="false"
+              type="primary"
+              @click="addSonRow(row)"
+            >
+              添加子项
+            </el-link>
+            <el-link
+              v-if="permissionList.delBtn"
+              :underline="false"
+              type="info"
+              @click="deleteRow(row)"
+            >
+              删除
+            </el-link>
+          </DividerGroup>
+        </template>
+      </vxe-column>
+    </vxe-table>
+
+    <el-dialog
+      v-model="dialogInfo.visible"
+      form
+      :title="dialogInfo.title"
+      width="500px"
+      draggable
+      overflow
+    >
       <el-form
         ref="formRef"
         label-width="94px"
@@ -376,8 +401,9 @@ onMounted(() => {
             :check-strictly="true"
             :props="{ value: 'id', label: 'name' }"
             style="width: 100%;"
-            filterable
+
             clearable
+            filterable
             @change="parentIdChange"
           />
         </el-form-item>
@@ -464,8 +490,8 @@ onMounted(() => {
           确定
         </el-button>
       </template>
-    </ele-modal>
-  </ele-page>
+    </el-dialog>
+  </TablePage>
 </template>
 
 <style scoped lang='scss'>

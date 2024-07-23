@@ -3,6 +3,8 @@ import type { MenuItem } from '@/api/layout/model'
 import type { RouteRecordRaw } from 'vue-router'
 import { isExternalLink, isSelfRouterData, eachTree } from '@/utils/common-utils'
 import Layout from '@/layouts/index.vue'
+import { REDIRECT_PATH } from '@/config/setting'
+import RedirectLayout from '@/layouts/RedirectLayout/index.vue'
 
 const VITE_PUBLIC_PATH = import.meta.env.VITE_PUBLIC_PATH
 const views = import.meta.glob('../../views/**/index.vue')
@@ -43,6 +45,7 @@ const useRouteStore = defineStore(
                 item.meta.breadcrumbNeste = [...parent.meta.breadcrumbNeste, breadcrumb]
               }
             })
+            // 设置首页(NOTE:wyc 可以遍历到第一个 不为 404 的路由设置为首页)
             let fstItem = rawData.value[0]
             while (fstItem.children && fstItem.children.length > 0) {
               fstItem = fstItem.children[0]
@@ -99,6 +102,7 @@ const useRouteStore = defineStore(
         // -- 找不到
         if (item.category === 1) {
           if (isExternalLink(item.path) || item.isOpen === 1) {
+            // NOTE:这里实际上没用到，因为外部链接直接window.open了，不过逻辑可以留着
             routerItem.meta = {
               ...meta,
               isLink: item.path,
@@ -146,12 +150,19 @@ const useRouteStore = defineStore(
 
     /** 注册路由 */
     function registerRoutes() {
+      const redirectRoute = {
+        path: `${REDIRECT_PATH}/:path(.*)`,
+        component: RedirectLayout,
+        meta: { hideFooter: true },
+      }
+
       const layout = {
         path: '/',
         component: Layout,
         redirect: rawData.value[0].path,
         children: flatRoutes.value,
       }
+
       const profile = {
         path: '/system/profile/index',
         component: () => import('@/views/system/profile/index.vue'),
@@ -166,6 +177,7 @@ const useRouteStore = defineStore(
           title: '找不到页面',
         },
       }
+      layout.children.unshift(redirectRoute)
       layout.children.push(profile)
       layout.children.push(notFound)
 
@@ -177,6 +189,7 @@ const useRouteStore = defineStore(
       router.removeRoute('layout')
       router.removeRoute('profile')
       router.removeRoute('notFound')
+      isGenerate.value = false
     }
 
     return {

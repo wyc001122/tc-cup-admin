@@ -16,7 +16,7 @@ import type {
 import VxeUI from 'vxe-pc-ui'
 
 /** 开启页签栏后是否缓存组件 */
-export const TAB_KEEP_ALIVE = true
+export const TAB_KEEP_ALIVE = false
 /** 主题配置本地缓存的名称 */
 export const THEME_CACHE_NAME = 'theme'
 /**
@@ -52,11 +52,11 @@ const DEFAULT_STATE = Object.freeze<ThemeState>({
   /** 内容区是否撑满 */
   fluid: true,
   /** 图标是否置于顶栏 */
-  logoInHeader: true,
+  logoInHeader: false,
   /** 侧栏菜单是否彩色图标 */
   colorfulIcon: false,
   /** 侧栏排他展开 */
-  uniqueOpened: true,
+  uniqueOpened: false,
   /** 固定主页页签 */
   fixedHome: false,
   /** 页签是否置于顶栏 */

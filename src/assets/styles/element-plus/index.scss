@@ -30,6 +30,10 @@ html.rounded {
     border-top-left-radius: var(--el-border-radius-base);
     border-top-right-radius: var(--el-border-radius-base);
   }
+
+  .el-pagination {
+    --el-pagination-border-radius: var(--el-border-radius-base);
+  }
 }
 
 // number input
@@ -37,4 +41,49 @@ html.rounded {
 .el-input-number .el-input-number__decrease {
   top: 1px;
   bottom: 1px;
+}
+
+// table 表头分割线
+.el-table__header-wrapper .el-table__cell:not(:last-child) {
+  &::after {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 0;
+    height: 20px;
+    margin-top: -10px;
+    content: "";
+    border-right: 1px solid var(--el-border-color);
+  }
+
+  &.col--last::after {
+    display: none;
+  }
+}
+
+.el-pagination {
+  --el-pagination-button-bg-color: var(--el-fill-color-light) !important;
+}
+
+// 表单弹窗，调整一下样式
+.el-dialog[form] {
+  padding-right: 18px;
+  padding-bottom: 18px;
+
+  .el-dialog__header {
+    .el-dialog__title {
+      font-size: 16px;
+    }
+
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--el-text-color-primary);
+  }
+}
+
+// 只读表单，调整一下样式
+.el-form[readonly] {
+  .el-form-item {
+    margin-bottom: 8px;
+  }
 }

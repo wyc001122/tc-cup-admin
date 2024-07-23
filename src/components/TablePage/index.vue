@@ -13,7 +13,7 @@ const usedToolSlots = computed(() => slots?.tool && slots?.tool().length > 0)
       <slot name="search" />
     </ele-card>
     <ele-card :flex-table="true">
-      <ele-page v-if="usedToolSlots" :plain="true" class="m-b-[20px]">
+      <ele-page v-if="usedToolSlots" :plain="true" class="table-tools">
         <slot name="tool" />
       </ele-page>
       <ele-page :flex-table="true" :plain="true">
@@ -23,4 +23,15 @@ const usedToolSlots = computed(() => slots?.tool && slots?.tool().length > 0)
   </ele-page>
 </template>
 
-<style scoped lang='scss'></style>
+<style scoped lang='scss'>
+:deep(.table-tools) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  & > * {
+    margin: 0;
+  }
+}
+</style>

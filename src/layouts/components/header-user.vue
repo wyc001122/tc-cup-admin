@@ -13,7 +13,7 @@ const userStore = useUserStore()
 const passwordVisible = ref(false)
 
 /** 当前用户信息 */
-const loginUser = computed(() => userStore.userInfo ?? {})
+const { userInfo } = storeToRefs(userStore)
 
 /** 用户信息下拉点击 */
 function onUserDropClick(command: any) {
@@ -69,9 +69,15 @@ function onUserDropClick(command: any) {
     @command="onUserDropClick"
   >
     <div class="header-avatar">
-      <el-avatar :size="28" :src="loginUser.avatar" :icon="loginUser.avatar" style="transform: translateY(-1px);" />
+      <el-avatar
+        :size="28"
+        alt="avatar"
+        :src="userInfo.avatar"
+        :icon="userInfo.avatar"
+        style="transform: translateY(-1px);"
+      />
       <div class="hidden-sm-and-down" style="margin-left: 4px; line-height: 1.5;">
-        {{ loginUser.nick_name }}
+        {{ userInfo.name }}
       </div>
       <el-icon>
         <ArrowDown />

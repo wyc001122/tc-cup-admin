@@ -37,7 +37,7 @@ export interface MenuItem {
   code: string
   /** 节点名称 */
   name: string
-  /** 路由别名(tc-admin中没用到) */
+  /** 路由别名(tc-cup-admin中没用到) */
   alias: string
   /** 节点路由地址 */
   path: string
@@ -99,4 +99,69 @@ export interface MenuItem {
   /** 重定向 */
   redirect?: string
 
+}
+
+export interface UserVO对象 {
+  /** 账号  */
+  account?: string
+  /** 头像  */
+  avatar?: string
+  /** 生日 (date-time) */
+  birthday?: string
+  /** 用户编号  */
+  code?: string
+  /** 创建部门 (int64) */
+  createDept?: number
+  /** 创建时间 (date-time) */
+  createTime?: string
+  /** 创建人 (int64) */
+  createUser?: number
+  /** 部门id  */
+  deptId?: string
+  /** undefined  */
+  deptName?: string
+  /** 邮箱  */
+  email?: string
+  /** undefined (int64) */
+  id?: number
+  /** 是否已删除 (int32) */
+  isDeleted?: number
+  /** 昵称  */
+  name?: string
+  /** undefined  */
+  orgId?: string
+  /** undefined  */
+  orgName?: string
+  /** 手机  */
+  phone?: string
+  /** 岗位id  */
+  postId?: string
+  /** undefined  */
+  postName?: string
+  /** 真名  */
+  realName?: string
+  /** 角色id  */
+  roleId?: string
+  /** undefined  */
+  roleName?: string
+  /** 性别 (int32) */
+  sex?: number
+  /** undefined  */
+  sexName?: string
+  /** 业务状态 (int32) */
+  status?: number
+  /** 租户ID  */
+  tenantId?: string
+  /** undefined  */
+  tenantName?: string
+  /** 更新时间 (date-time) */
+  updateTime?: string
+  /** 更新人 (int64) */
+  updateUser?: number
+  /** undefined  */
+  userExt?: string
+  /** 用户平台 (int32) */
+  userType?: number
+  /** undefined  */
+  userTypeName?: string
 }

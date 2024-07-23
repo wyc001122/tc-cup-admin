@@ -1,6 +1,6 @@
 import { useStorage } from '@vueuse/core'
 import useUserStore from '@/store/modules/user'
-import { removeCupToken, SESSION_KEY, setCupToken } from '@/utils/token-utils'
+import { removeCupToken, USER_INFO_KEY, setCupToken } from '@/utils/token-utils'
 import type { UserInfo } from '@/utils/token-utils'
 import http from './index'
 import { refreshTokenApi } from '@/api/layout/index'
@@ -11,7 +11,7 @@ let isRefresh = false
 
 export default async function refreshToken(error: any) {
   const userStore = useUserStore()
-  const userInfo = useStorage<Partial<UserInfo>>(SESSION_KEY, {}, sessionStorage)
+  const userInfo = useStorage<Partial<UserInfo>>(USER_INFO_KEY, {}, sessionStorage)
   const refresh_token = userInfo.value.refresh_token
   const { config } = error
   if (!refresh_token) {

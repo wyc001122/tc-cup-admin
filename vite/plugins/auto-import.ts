@@ -15,9 +15,7 @@ export default function createAutoImport() {
     ],
     resolvers: [
       // Element 组件按需引入
-      ElementPlusResolver({
-        importStyle: 'sass',
-      }),
+      ElementPlusResolver(),
       // EleAdminPlus 组件按需引入
       EleAdminResolver({
         importStyle: 'sass',

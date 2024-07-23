@@ -6,7 +6,13 @@ import createVitePlugins from './vite/plugins'
 // https://vitejs.dev/config/
 export default async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd())
-
+  const alias = {
+    '@': path.resolve(__dirname, 'src'),
+    '#': path.resolve(__dirname, 'src/types'),
+  }
+  if (command === 'build') {
+    alias['./as-needed'] = './global-import'
+  }
   return defineConfig({
     // 开发服务器选项 https://cn.vitejs.dev/config/#server-options
     base: env.VITE_PUBLIC_PATH,
@@ -38,10 +44,7 @@ export default async ({ mode, command }) => {
     },
     plugins: createVitePlugins(env, command === 'build'),
     resolve: {
-      alias: {
-        '@': path.resolve(__dirname, 'src'),
-        '#': path.resolve(__dirname, 'src/types'),
-      },
+      alias,
     },
     css: {
       preprocessorOptions: {

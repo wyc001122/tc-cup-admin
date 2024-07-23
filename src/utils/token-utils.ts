@@ -2,10 +2,11 @@ import { Base64 } from 'js-base64'
 import { useStorage } from '@vueuse/core'
 import type { LoginResponse } from '@/api/layout/model'
 
-export const SESSION_KEY = 'sola_user_info'
+export const USER_INFO_KEY = 'sola_user_info'
+export const TENANT_INFO_KEY = 'tenant_info'
 let token_type = 'Bearer'
 
-const userInfo = useStorage<Partial<UserInfo>>(SESSION_KEY, {}, sessionStorage)
+const userInfo = useStorage<Partial<UserInfo>>(USER_INFO_KEY, {}, sessionStorage)
 
 /**
  * 用户请求头中的Authorization

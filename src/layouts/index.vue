@@ -2,6 +2,7 @@
 import useMenuStore from '@/store/modules/menu'
 import useThemeStore from '@/store/modules/theme'
 import useRouteStore from '@/store/modules/route'
+import useUserStore from '@/store/modules/user'
 import usePageTab from '@/utils/use-page-tab'
 import LayoutTool from './components/LayoutTool.vue'
 import { REDIRECT_PATH, TAB_KEEP_ALIVE } from '@/config/setting'
@@ -23,13 +24,14 @@ import {
 } from '@element-plus/icons-vue'
 
 const menuStore = useMenuStore()
-const menus = computed(() => menuStore.menus) as any
-const VITE_APP_TITLE = import.meta.env.VITE_APP_TITLE
-const { push } = useRouter()
-
+const userStore = useUserStore()
 const themeStore = useThemeStore()
 const routeStore = useRouteStore()
 const route = useRoute()
+
+const menus = computed(() => menuStore.menus) as any
+const VITE_APP_TITLE = computed(() => userStore.tenantInfo.systemName || import.meta.env.VITE_APP_TITLE || 'TC-Admin')
+const { push } = useRouter()
 
 const isWujie = computed(() => route.meta?.isWujie)
 /** 布局风格 */
@@ -306,11 +308,20 @@ function updateDarkMode(isDark: any) {
     </template>
     <!-- logo -->
     <template #logo>
-      <img src="@/assets/icons/logo.svg" style="width: 30px; height: 30px;">
+      <img
+        src="@/assets/icons/logo.svg"
+        alt="logo"
+        style="width: 30px; height: 30px;"
+        :style="{
+          paddingLeft: collapse ? '0' : '7px',
+        }"
+      >
     </template>
     <!-- 系统名称 -->
     <template #logoTitle>
-      <h1>{{ VITE_APP_TITLE }}</h1>
+      <h1 class="p-r-[7px]" :title="VITE_APP_TITLE">
+        {{ VITE_APP_TITLE }}
+      </h1>
     </template>
     <!-- 顶栏左侧按钮 -->
     <template #left="{ sidebar }">

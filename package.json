@@ -27,6 +27,7 @@
     "@vueuse/integrations": "^10.11.0",
     "@vueuse/motion": "^2.2.3",
     "axios": "^1.6.8",
+    "cropperjs": "^1.6.2",
     "dayjs": "^1.11.10",
     "defu": "^6.1.4",
     "echarts": "^5.5.0",
@@ -47,10 +48,12 @@
     "universal-cookie": "^6",
     "vue": "^3.4.23",
     "vue-echarts": "^6.6.9",
+    "vue-request": "^2.0.4",
     "vue-router": "^4.3.2",
     "vuedraggable": "^4.1.0",
     "vxe-table": "^4.7.48",
-    "wujie-vue3": "^1.0.22"
+    "wujie-vue3": "^1.0.22",
+    "xgplayer": "^3.0.18"
   },
   "devDependencies": {
     "@antfu/eslint-config": "2.15.0",

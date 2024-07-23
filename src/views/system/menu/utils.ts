@@ -1,18 +1,17 @@
 import type {
   menu_list,
 } from '@/api/modules/cup-sys/menu'
-import type { MaybeRef } from 'vue'
 
 interface SearchForm {
   keywords?: string
   withParents?: boolean
 }
 
-type RowTableData = ExtractAxiosData<typeof menu_list>
+type RowTableData = ExtractAxiosRes<typeof menu_list>['data']
 
 export function useFilterData(searchForm: Ref<SearchForm>) {
   /** 搜索方法 */
-  function filterHandler(rowTableData: MaybeRef<RowTableData>) {
+  function filterHandler(rowTableData: RowTableData) {
     let filterVal = searchForm.value.keywords || ''
     filterVal = String(filterVal).trim().toLowerCase()
     if (filterVal) {
@@ -82,7 +81,7 @@ export function useFilterData(searchForm: Ref<SearchForm>) {
         ? filterTreeWithParents
         : filterTreeWithoutParents
 
-      const _res = _filterFn(JSON.parse(JSON.stringify(unref(rowTableData))))
+      const _res = _filterFn(JSON.parse(JSON.stringify(rowTableData)))
 
       treeDepTraverse(_res, (item: any) => {
         searchProps.forEach((key) => {
@@ -96,7 +95,7 @@ export function useFilterData(searchForm: Ref<SearchForm>) {
       return _res
     }
     else {
-      return unref(rowTableData)
+      return rowTableData
     }
   }
 
@@ -120,7 +119,7 @@ export const DEFAULT_DATA = {
     isOpen: 0,
     showLink: true,
     sort: 1,
-    path: '/',
+    path: '',
   },
   ADDSON: {
     category: 1,

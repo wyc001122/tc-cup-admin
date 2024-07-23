@@ -14,3 +14,21 @@ html.rounded {
 .vxe-table--render-default .vxe-table--border-line {
   border: none !important;
 }
+
+// 给表头加一个竖线
+.vxe-table--render-wrapper > .vxe-table--main-wrapper > .vxe-table--header-wrapper.body--wrapper > table > thead > tr > th.vxe-header--column {
+  &::after {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 0;
+    height: 20px;
+    margin-top: -10px;
+    content: "";
+    border-right: 1px solid var(--el-border-color);
+  }
+
+  &.col--last::after {
+    display: none;
+  }
+}

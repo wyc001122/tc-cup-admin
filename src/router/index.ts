@@ -40,6 +40,7 @@ router.beforeEach(async (to) => {
       }
     }
     else {
+      userStore.getUserInfo()
       userStore.getBtnPermissions()
       await routeStore.getRoutesByBackend()
       routeStore.registerRoutes()

@@ -1,6 +1,6 @@
 import http from '@/http'
 import type { LoginFormData } from '@/views/login/types'
-import type { LoginResponse, MenuItem } from './model'
+import type { LoginResponse, MenuItem, UserVO对象 } from './model'
 import { eachTree } from '@/utils/common-utils'
 import type { AxiosResponse } from 'axios'
 
@@ -8,7 +8,7 @@ const VITE_ROUTER_BASE = import.meta.env.VITE_ROUTER_BASE
 
 /** 登录接口 */
 export function loginApi(params: LoginFormData) {
-  return http.request<any, LoginResponse>({
+  return http.request<any, LoginResponse & AxiosResponse>({
     url: '/cup-auth/oauth/token',
     method: 'post',
     params: {
@@ -62,5 +62,31 @@ export function getRoutesByBackendApi() {
       })
       resolve(res)
     })
+  })
+}
+export function getUserInfoApi(params?: any, other?: any) {
+  return http.request<UserVO对象>({
+    url: `/cup-user/detail`,
+    method: 'GET',
+    params,
+    ...other,
+  })
+}
+
+// TODO:wyc 暂时接口没有返回值,待修复
+// export function getTenantInfoApi(params?: any, other?: any) {
+//   return http.request<UserVO对象>({
+//     url: `/cup-system/tenant/info`,
+//     method: 'GET',
+//     params,
+//     ...other,
+//   })
+// }
+export function getTenantInfoApi(params?: any, other?: any) {
+  return http.request<UserVO对象>({
+    url: `/cup-system/tenant/list`,
+    method: 'GET',
+    params,
+    ...other,
   })
 }
