@@ -1,19 +1,34 @@
 <script setup lang='ts'>
+import { Comment } from 'vue'
+
 const slots = useSlots()
 
-/** 是否使用了search插槽 */
-const usedSearchSlots = computed(() => slots?.search && slots?.search().length > 0)
-/** 是否使用了tool插槽 */
-const usedToolSlots = computed(() => slots?.tool && slots?.tool().length > 0)
+const searchSlots = computed(() => {
+  if (slots?.search && slots?.search().length > 0) {
+    return slots?.search().filter(item => item.type !== Comment)
+  }
+  else {
+    return []
+  }
+})
+
+const toolSlots = computed(() => {
+  if (slots?.tool && slots?.tool().length > 0) {
+    return slots?.tool().filter(item => item.type !== Comment)
+  }
+  else {
+    return []
+  }
+})
 </script>
 
 <template>
   <ele-page :flex-table="true">
-    <ele-card v-if="usedSearchSlots" :body-style="{ paddingBottom: '2px' }">
+    <ele-card v-if="searchSlots.length" :body-style="{ paddingBottom: '2px' }">
       <slot name="search" />
     </ele-card>
     <ele-card :flex-table="true">
-      <ele-page v-if="usedToolSlots" :plain="true" class="table-tools">
+      <ele-page v-if="toolSlots.length" :plain="true" class="table-tools">
         <slot name="tool" />
       </ele-page>
       <ele-page :flex-table="true" :plain="true">

@@ -4,8 +4,8 @@ import {
   menu_detail,
   menu_submit,
   menu_remove,
-} from '@/api/modules/cup-sys/menu'
-import { Plus, Delete, ArrowDown, ArrowUp, QuestionFilled } from '@element-plus/icons-vue'
+} from '@/api/modules/cup-system/menu'
+import { Plus, Delete, ArrowDown, ArrowUp } from '@element-plus/icons-vue'
 import { useFilterData, DEFAULT_DATA } from './utils'
 import type { VxeTableInstance } from 'vxe-table'
 import { useClipboard } from '@vueuse/core'
@@ -191,7 +191,7 @@ function deleteRow(rows: any) {
   rows = Array.isArray(rows) ? rows : [rows]
   const _ids = rows.map((item: any) => item.id)
   const _idsString = _ids.join(',')
-  ElMessageBox.confirm(rows.length > 1 ? `确定将选择的${rows.length}条数据删除?` : '确定将选择数据删除?', '提示', {
+  ElMessageBox.confirm(rows.length > 1 ? `确定将选择的${rows.length}条数据删除?` : '确定将选择的数据删除?', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',
@@ -346,7 +346,7 @@ onMounted(() => {
       />
       <vxe-column title="操作" align="center" width="170">
         <template #default="{ row }">
-          <DividerGroup>
+          <DividerSpace>
             <el-link
               v-if="permissionList.editBtn"
               :underline="false"
@@ -371,7 +371,7 @@ onMounted(() => {
             >
               删除
             </el-link>
-          </DividerGroup>
+          </DividerSpace>
         </template>
       </vxe-column>
     </vxe-table>

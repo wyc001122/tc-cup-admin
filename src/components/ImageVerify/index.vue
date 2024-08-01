@@ -4,6 +4,7 @@ import { useImageVerify } from './hooks'
 interface Props {
   code?: string
 }
+
 const props = withDefaults(defineProps<Props>(), {
   code: '',
 })

@@ -7,7 +7,8 @@ const route = useRoute()
 const router = useRouter()
 const routeStore = useRouteStore()
 function goBack() {
-  router.push(routeStore.homePath)
+  // router.push(routeStore.homePath)
+  router.back()
 }
 
 const data = ref({
@@ -15,24 +16,24 @@ const data = ref({
   countdown: 5,
 })
 
-onBeforeRouteLeave(() => {
-  data.value.inter && window.clearInterval(data.value.inter)
-})
+// onBeforeRouteLeave(() => {
+//   data.value.inter && window.clearInterval(data.value.inter)
+// })
 
-onMounted(() => {
-  data.value.inter = window.setInterval(() => {
-    data.value.countdown--
-    if (data.value.countdown === 0) {
-      data.value.inter && window.clearInterval(data.value.inter)
-      if (themeStore.state.tabBar) {
-        themeStore.tabRemove({
-          key: route.path,
-        })
-      }
-      goBack()
-    }
-  }, 1000)
-})
+// onMounted(() => {
+//   data.value.inter = window.setInterval(() => {
+//     data.value.countdown--
+//     if (data.value.countdown === 0) {
+//       data.value.inter && window.clearInterval(data.value.inter)
+//       if (themeStore.state.tabBar) {
+//         themeStore.tabRemove({
+//           key: route.path,
+//         })
+//       }
+//       goBack()
+//     }
+//   }, 1000)
+// })
 </script>
 
 <template>
@@ -47,7 +48,8 @@ onMounted(() => {
       </div>
       <div>
         <el-button @click="goBack">
-          {{ data.countdown }} 秒后，返回首页
+          <!-- {{ data.countdown }} 秒后，返回 -->
+          返回
         </el-button>
       </div>
     </div>

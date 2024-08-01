@@ -4,15 +4,25 @@ import type { FormInstance } from 'element-plus'
 const props = defineProps({
   title: {
     type: String,
-    default: '新增用户',
+    default: '',
   },
   data: {
     type: Object,
     default: () => {},
   },
+  type: {
+    type: String,
+    default: '',
+  },
 })
 
 const emits = defineEmits(['submit'])
+
+const tenantList = inject<any>('tenantList')
+const roleList = inject<any>('roleList')
+const departmentList = inject<any>('departmentList')
+const postList = inject<any>('postList')
+
 const modelValue = defineModel<boolean>('modelValue')
 const form = ref<any>({})
 
@@ -42,16 +52,11 @@ const rules = ref({
   name: [{ required: true, message: '请输入用户昵称', trigger: 'blur' }],
 })
 
-const tenantList = inject<any>('tenantList')
-const roleList = inject<any>('roleList')
-const departmentList = inject<any>('departmentList')
-const postList = inject<any>('postList')
-
 function close() {
   modelValue.value = false
 }
 
-function save() {
+function submit() {
   formRef.value?.validate((valid: any) => {
     if (valid) {
       emits('submit', form.value)
@@ -77,8 +82,15 @@ onMounted(() => {
     :destroy-on-close="true"
     draggable
     overflow
+    top="15vh"
   >
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-suffix="："
+      label-width="100px"
+    >
       <el-divider content-position="left">
         基础信息
       </el-divider>
@@ -145,9 +157,10 @@ onMounted(() => {
           <el-select
             v-model="form.roleId"
             placeholder="请选择所属角色"
-            multiple
+
             clearable
             filterable
+            multiple
           >
             <el-option v-for="item in roleList" :key="item.id" :label="item.title" :value="item.id" />
           </el-select>
@@ -161,10 +174,11 @@ onMounted(() => {
               label: 'title',
             }"
             placeholder="请选择所属角色"
-            check-strictly
+
             multiple
             clearable
             filterable
+            check-strictly
           />
         </el-form-item>
         <el-form-item label="所属岗位" prop="postId">
@@ -185,7 +199,7 @@ onMounted(() => {
       <el-button @click="close">
         取消
       </el-button>
-      <el-button type="primary" @click="save">
+      <el-button type="primary" @click="submit">
         保存
       </el-button>
     </template>

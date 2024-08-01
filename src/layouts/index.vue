@@ -22,6 +22,7 @@ import {
   Sunny,
   Moon,
 } from '@element-plus/icons-vue'
+import tcAdminLogo from '@/assets/icons/logo.svg'
 
 const menuStore = useMenuStore()
 const userStore = useUserStore()
@@ -30,7 +31,8 @@ const routeStore = useRouteStore()
 const route = useRoute()
 
 const menus = computed(() => menuStore.menus) as any
-const VITE_APP_TITLE = computed(() => userStore.tenantInfo.systemName || import.meta.env.VITE_APP_TITLE || 'TC-Admin')
+const systemName = computed(() => userStore.tenantInfo.systemName || import.meta.env.VITE_APP_TITLE || 'TC-Admin')
+const systemLogo = computed(() => userStore.tenantInfo.systemLogo || tcAdminLogo) as any
 const { push } = useRouter()
 
 const isWujie = computed(() => route.meta?.isWujie)
@@ -309,18 +311,19 @@ function updateDarkMode(isDark: any) {
     <!-- logo -->
     <template #logo>
       <img
-        src="@/assets/icons/logo.svg"
+        :src="systemLogo"
         alt="logo"
-        style="width: 30px; height: 30px;"
+        style=" height: 30px;object-fit: contain;"
+
         :style="{
-          paddingLeft: collapse ? '0' : '7px',
+          paddingLeft: collapse ? '0' : '14px',
         }"
       >
     </template>
     <!-- 系统名称 -->
     <template #logoTitle>
-      <h1 class="p-r-[7px]" :title="VITE_APP_TITLE">
-        {{ VITE_APP_TITLE }}
+      <h1 class="p-r-[7px]" :title="systemName">
+        {{ systemName }}
       </h1>
     </template>
     <!-- 顶栏左侧按钮 -->
@@ -348,8 +351,8 @@ function updateDarkMode(isDark: any) {
       <!-- 全屏切换 -->
       <LayoutTool class="hidden-sm-and-down" @click="toggleFullscreen">
         <el-icon style="transform: scale(1.18);">
-          <CompressOutlined v-if="isFullscreen" style="stroke-width: 4;" />
-          <ExpandOutlined v-else style="stroke-width: 4;" />
+          <SvgIcon v-if="isFullscreen" name="compress" style="stroke-width: 4;" />
+          <SvgIcon v-else name="expand" />
         </el-icon>
       </LayoutTool>
       <!-- 夜间模式 -->

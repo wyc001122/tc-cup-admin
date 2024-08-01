@@ -1,10 +1,10 @@
 <script setup lang='ts'>
 import { useElementSize } from '@vueuse/core'
 import { info, list, submit, update, remove, reset_password } from '@/api/modules/cup-user/index'
-import { tenant_select } from '@/api/modules/cup-sys/tenant'
-import { role_tree } from '@/api/modules/cup-sys/role'
-import { dept_tree } from '@/api/modules/cup-sys/dept'
-import { post_select } from '@/api/modules/cup-sys/post'
+import { tenant_select } from '@/api/modules/cup-system/tenant'
+import { role_tree } from '@/api/modules/cup-system/role'
+import { dept_tree } from '@/api/modules/cup-system/dept'
+import { post_select } from '@/api/modules/cup-system/post'
 // 弹窗组件
 import AddForm from './components/DialogForm/AddForm.vue'
 import EditForm from './components/DialogForm/EditForm.vue'
@@ -39,7 +39,6 @@ function getTableData() {
     })
 }
 
-/** 修复最大页码 */
 function fixCurrent(pages: number) {
   if (pages > 0 && current.value > pages) {
     current.value = pages
@@ -47,13 +46,11 @@ function fixCurrent(pages: number) {
   }
 }
 
-/** 根据当前条件查询 */
 function search() {
   current.value === 1
   getTableData()
 }
 
-/** 重置查询条件 */
 function reset() {
   searchForm.value = {}
   current.value = 1
@@ -106,12 +103,11 @@ function viewRow(row: any) {
   })
 }
 
-/** 批量删除 */
 const tableRef = ref()
 function batchDelHandler() {
   const _nodes = tableRef.value?.getSelectionRows()
   if (_nodes && _nodes.length === 0) {
-    ElMessage.warning('请选择要删除的数据！')
+    ElMessage.warning('请选择要删除的用户！')
   }
   else {
     deleteRow(_nodes)
@@ -122,7 +118,7 @@ function deleteRow(rows: any) {
   rows = Array.isArray(rows) ? rows : [rows]
   const _ids = rows.map((item: any) => item.id)
   const _idsString = _ids.join(',')
-  ElMessageBox.confirm(rows.length > 1 ? `确定将选择的${rows.length}条数据删除?` : '确定将选择数据删除?', '提示', {
+  ElMessageBox.confirm(rows.length > 1 ? `确定将选择的${rows.length}个用户删除?` : '确定将选择的用户删除?', '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',
@@ -196,13 +192,6 @@ function submitEdit(formData: any) {
   })
 }
 
-/**
- *
- *
- * 固定的逻辑
- *
- *
- */
 function indexFn(index: number) {
   return (current.value - 1) * size.value + index + 1
 }
@@ -229,19 +218,6 @@ watch(width, (value) => {
   }
 })
 
-/**
- *
- *
- *
- *
- *
- * 其他数据获取(自定义)
- *
- *
- *
- *
- *
- */
 const tenantList = ref<any>([])
 const roleList = ref<any>([])
 const departmentList = ref<any>([])
@@ -258,6 +234,7 @@ function getTenantList() {
     }
   })
 }
+
 function getRoleList() {
   role_tree({}).then((res) => {
     if (res.code === 200) {
@@ -265,6 +242,7 @@ function getRoleList() {
     }
   })
 }
+
 function getDepartmentList() {
   dept_tree({}).then((res) => {
     if (res.code === 200) {
@@ -301,6 +279,11 @@ onMounted(() => {
           </el-form-item>
           <el-form-item label="用户姓名">
             <el-input v-model="searchForm.realName" placeholder="请输入用户姓名" clearable />
+          </el-form-item>
+          <el-form-item label="所属租户">
+            <el-select v-model="searchForm.tenantId" placeholder="请选择所属租户" clearable filterable>
+              <el-option v-for="item in tenantList" :key="item.tenantId" :label="item.tenantName" :value="item.tenantId" />
+            </el-select>
           </el-form-item>
           <el-form-item label="所属角色">
             <el-select v-model="searchForm.roleId" placeholder="请选择所属角色" clearable filterable>
@@ -369,9 +352,10 @@ onMounted(() => {
       <el-table-column prop="tenantName" label="所属租户" />
       <el-table-column prop="roleName" label="所属角色" />
       <el-table-column prop="deptName" label="所属部门" />
-      <el-table-column prop="postName" label="操作" width="150" align="center">
+      <el-table-column prop="postName" label="所属岗位" />
+      <el-table-column label="操作" width="150" align="center">
         <template #default="{ row }">
-          <DividerGroup>
+          <DividerSpace>
             <el-link :underline="false" type="primary" @click="viewRow(row)">
               查看
             </el-link>
@@ -381,7 +365,7 @@ onMounted(() => {
             <el-link :underline="false" type="info" @click="deleteRow(row)">
               删除
             </el-link>
-          </DividerGroup>
+          </DividerSpace>
         </template>
       </el-table-column>
     </el-table>

@@ -1,7 +1,11 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { User, Upload, OfficeBuilding, Phone } from '@element-plus/icons-vue'
-import type { UserVO对象 } from '@/api/modules/cup-user/_model'
+import { Upload } from '@element-plus/icons-vue'
+import { oss_endpoint_put_file } from '@/api/modules/cup-resource/oss'
+import EleCropperModal from 'ele-admin-plus/es/ele-cropper-modal/index'
+import { ElLoading } from 'element-plus'
+import { update } from '@/api/modules/cup-user/index'
+import useUserStore from '@/store/modules/user'
 
 const porps = defineProps({
   data: {
@@ -10,57 +14,83 @@ const porps = defineProps({
   },
 })
 
-/** 岗位 */
+const userStore = useUserStore()
+
 const postName = computed(() => {
   return porps?.data?.postName?.split(',') ?? []
 })
 
-/** 角色 */
 const roleName = computed(() => {
   return porps?.data?.roleName?.split(',') ?? []
 })
 
-/** 是否显示裁剪弹窗 */
 const visible = ref(false)
 
-/** 打开图片裁剪 */
 function openCropper() {
   visible.value = true
 }
-/** 头像裁剪完成回调 */
-function onCrop(result: string) {
+
+function onCrop(blob: any) {
   visible.value = false
-  // emit('done', { avatar: result })
-  /* const loading = EleMessage.loading({
-      message: '请求中..',
-      plain: true
-    });
-    updateUserInfo({ avatar: result })
-      .then((data) => {
-        loading.close();
-        visible.value = false;
-        EleMessage.success('修改成功');
-        emit('done', data);
-      })
-      .catch((e) => {
-        loading.close();
-        EleMessage.error(e.message);
-      }); */
+  const loading = ElLoading.service({
+  })
+  oss_endpoint_put_file({ file: blob }, {
+    headers: {
+      'content-Type': 'multipart/form-data',
+    },
+  })
+    .then((res) => {
+      if (res.code === 200) {
+        form.value.avatar = res.data.link
+
+        saveHandler()
+
+        loading.close()
+        visible.value = false
+      }
+    })
+    .catch((e) => {
+      loading.close()
+      ElMessage.error(e.message)
+    })
 }
+
+const loading = ref(false)
+function saveHandler() {
+  loading.value = true
+  update({
+    ...porps.data,
+    avatar: form.value.avatar,
+  }).then((res) => {
+    if (res.code === 200) {
+      ElMessage.success('修改成功')
+      userStore.getUserInfo()
+    }
+  }).finally(() => {
+    loading.value = false
+  })
+}
+
+const form = ref<any>({})
+onMounted(() => {
+  form.value = {
+    ...porps.data,
+  }
+})
 </script>
 
 <template>
   <ele-card class="profile-center">
     <div class="info-user">
       <div class="info-user-avatar" @click="openCropper">
-        <el-avatar :size="100" :src="data.avatar" />
+        <el-avatar :size="100" :src="form.avatar" />
         <el-icon class="info-user-avatar-icon">
           <Upload style="stroke-width: 3;" />
         </el-icon>
       </div>
       <div>
         <el-text style="margin-top: 5px;font-size: 24px;">
-          {{ data.name }}
+          {{ form.name }}
         </el-text>
       </div>
     </div>
@@ -70,7 +100,7 @@ function onCrop(result: string) {
           <EnvironmentOutlined />
         </el-icon>
         <div class="info-item-text">
-          所属租户： {{ data.tenantName }}
+          所属租户： {{ form.tenantName }}
         </div>
       </div>
       <div class="info-item">
@@ -78,7 +108,7 @@ function onCrop(result: string) {
           <UserOutlined />
         </el-icon>
         <div class="info-item-text">
-          部门： {{ data.deptName }}
+          部门： {{ form.deptName }}
         </div>
       </div>
       <div class="info-item">
@@ -107,7 +137,7 @@ function onCrop(result: string) {
           <TagOutlined style="transform: translateY(-1px);" />
         </el-icon>
         <div class="info-item-text">
-          生日：{{ data.birthday }}
+          生日：{{ form.birthday }}
         </div>
       </div>
       <div class="info-item">
@@ -115,7 +145,7 @@ function onCrop(result: string) {
           <TagOutlined style="transform: translateY(-1px);" />
         </el-icon>
         <div class="info-item-text">
-          创建时间：{{ data.createTime }}
+          创建时间：{{ form.createTime }}
         </div>
       </div>
       <div class="info-item">
@@ -123,23 +153,19 @@ function onCrop(result: string) {
           <TagOutlined style="transform: translateY(-1px);" />
         </el-icon>
         <div class="info-item-text">
-          更新时间：{{ data.updateTime }}
+          更新时间：{{ form.updateTime }}
         </div>
       </div>
     </div>
 
-    <!-- <EleCropperModal
+    <EleCropperModal
       v-model="visible"
-      :src="data.avatar"
-      :options="{
-        aspectRatio: 1,
-        autoCropArea: 1,
-        viewMode: 1,
-        dragMode: 'move',
-      }"
+      :src="form.avatar"
+      :options="{ aspectRatio: 1, autoCropArea: 1, viewMode: 1, dragMode: 'move' }"
       :modal-props="{ destroyOnClose: true }"
+      :to-blob="true"
       @done="onCrop"
-    /> -->
+    />
   </ele-card>
 </template>
 

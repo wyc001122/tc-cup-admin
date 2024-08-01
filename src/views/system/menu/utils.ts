@@ -1,6 +1,6 @@
 import type {
   menu_list,
-} from '@/api/modules/cup-sys/menu'
+} from '@/api/modules/cup-system/menu'
 
 interface SearchForm {
   keywords?: string

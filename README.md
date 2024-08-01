@@ -1,3 +1,4 @@
-## pnpm add @vueuse/integrations nprogress
-进度条
-https://vueuse.org/integrations/useNProgress/
+# TODO
+
+1、系统Logo 统一使用svg，便于根据主题色切换
+2、分页器自适应

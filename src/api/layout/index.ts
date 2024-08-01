@@ -72,19 +72,9 @@ export function getUserInfoApi(params?: any, other?: any) {
     ...other,
   })
 }
-
-// TODO:wyc 暂时接口没有返回值,待修复
-// export function getTenantInfoApi(params?: any, other?: any) {
-//   return http.request<UserVO对象>({
-//     url: `/cup-system/tenant/info`,
-//     method: 'GET',
-//     params,
-//     ...other,
-//   })
-// }
 export function getTenantInfoApi(params?: any, other?: any) {
   return http.request<UserVO对象>({
-    url: `/cup-system/tenant/list`,
+    url: `/cup-system/tenant/detail`,
     method: 'GET',
     params,
     ...other,

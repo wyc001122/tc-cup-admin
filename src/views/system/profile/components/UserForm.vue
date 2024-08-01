@@ -6,9 +6,8 @@ import { isPhoneStrong, isEmail, isChinese } from '@/utils/validate'
 import useUserStore from '@/store/modules/user'
 
 const userStore = useUserStore()
-const { userInfo } = storeToRefs(userStore)
 
-const form = defineModel<UserVO对象>({ required: true })
+const form = defineModel<Partial<UserVO对象>>({ required: true })
 
 const rules = ref<FormRules>({
   email: [

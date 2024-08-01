@@ -42,11 +42,10 @@ const useUserStore = defineStore(
         }
       })
       getTenantInfoApi({ tenantId: userInfo.value.tenant_id }).then((res: any) => {
-        if (res.code === 200 && res.data?.records) {
-          const _data = res.data.records[0]
+        if (res.code === 200) {
           tenantInfo.value = {
             ...tenantInfo.value,
-            ..._data,
+            ...res.data,
           }
         }
       })

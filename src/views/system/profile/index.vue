@@ -30,7 +30,7 @@ onMounted(() => {
 <template>
   <ele-page :multi-card="false">
     <div class="user-wrapper">
-      <UserCard :data="userInfo" class="user-side" />
+      <UserCard v-if="userInfo.id" :data="userInfo" class="user-side" />
       <ele-card
         :header-style="{ padding: '0 24px' }"
         :body-style="{ padding: 0, minHeight: '462px' }"

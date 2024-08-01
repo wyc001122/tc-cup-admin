@@ -32,3 +32,10 @@ html.rounded {
     display: none;
   }
 }
+
+// 调整一下vxe的表头高度，与element一致
+.vxe-table--render-default .vxe-body--column:not(.col--ellipsis),
+.vxe-table--render-default .vxe-footer--column:not(.col--ellipsis),
+.vxe-table--render-default .vxe-header--column:not(.col--ellipsis) {
+  padding: 8px 0 !important;
+}

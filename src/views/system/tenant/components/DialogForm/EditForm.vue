@@ -1,14 +1,21 @@
 <script setup lang='ts'>
-import type { FormInstance } from 'element-plus'
+import { ElLoading, type FormInstance } from 'element-plus'
+import EleCropperModal from 'ele-admin-plus/es/ele-cropper-modal/index'
+import { oss_endpoint_put_file } from '@/api/modules/cup-resource/oss'
+import { Upload, Picture as IconPicture } from '@element-plus/icons-vue'
 
 const props = defineProps({
   title: {
     type: String,
-    default: '编辑用户',
+    default: '',
   },
   data: {
     type: Object,
     default: () => {},
+  },
+  type: {
+    type: String,
+    default: '',
   },
 })
 
@@ -17,41 +24,37 @@ const modelValue = defineModel<boolean>('modelValue')
 const form = ref<any>({})
 
 const formRef = ref<FormInstance>()
-// 基础信息必填
 const rules = ref({
-  tenantId: [{ required: true, message: '请选择所属租户', trigger: 'change' }],
-  account: [{ required: true, message: '请输入登录账号', trigger: 'blur' }],
-  // password: [
-  //   { required: true, message: '请输入密码', trigger: 'blur' },
-  // ],
-  // password2: [{
-  //   required: true,
-  //   trigger: 'blur',
-  //   validator: (rule: any, value: any, callback: any) => {
-  //     if (value === '') {
-  //       callback(new Error('请再次输入密码'))
-  //     }
-  //     else if (value !== form.value.password) {
-  //       callback(new Error('两次输入密码不一致!'))
-  //     }
-  //     else {
-  //       callback()
-  //     }
-  //   },
-  // }],
-  name: [{ required: true, message: '请输入用户昵称', trigger: 'blur' }],
+  tenantName: [
+    { required: true, message: '请输入租户名称', trigger: 'blur' },
+  ],
+  systemName: [
+    { required: true, message: '请输入系统名称', trigger: 'blur' },
+  ],
+  jsonStr: [
+    {
+      trigger: 'blur',
+      validator: (rule: any, value: any, callback: any) => {
+        if (!value) {
+          callback()
+        }
+        try {
+          JSON.parse(value)
+          callback()
+        }
+        catch (e) {
+          callback(new Error('请输入合法的Json串'))
+        }
+      },
+    },
+  ],
 })
-
-const tenantList = inject<any>('tenantList')
-const roleList = inject<any>('roleList')
-const departmentList = inject<any>('departmentList')
-const postList = inject<any>('postList')
 
 function close() {
   modelValue.value = false
 }
 
-function save() {
+function submit() {
   formRef.value?.validate((valid: any) => {
     if (valid) {
       emits('submit', form.value)
@@ -59,13 +62,37 @@ function save() {
   })
 }
 
-// function passwordChange() {
-//   formRef.value?.validateField('password2')
-// }
-
 onMounted(() => {
   form.value = { ...props.data }
 })
+
+const visible = ref(false)
+
+function openCropper() {
+  visible.value = true
+}
+
+function onCrop(blob: any) {
+  visible.value = false
+  const loading = ElLoading.service({
+  })
+  oss_endpoint_put_file({ file: blob }, {
+    headers: {
+      'content-Type': 'multipart/form-data',
+    },
+  })
+    .then((res) => {
+      if (res.code === 200) {
+        form.value.systemLogo = res.data.link
+        loading.close()
+        visible.value = false
+      }
+    })
+    .catch((e) => {
+      loading.close()
+      ElMessage.error(e.message)
+    })
+}
 </script>
 
 <template>
@@ -73,110 +100,82 @@ onMounted(() => {
     v-model="modelValue"
     form
     :title="title"
-    width="600px"
+    width="700px"
     :destroy-on-close="true"
     draggable
     overflow
+    top="15vh"
   >
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-      <el-divider content-position="left">
-        基础信息
-      </el-divider>
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-suffix="："
+      label-width="120px"
+      @keyup.enter="submit"
+      @submit.prevent=""
+    >
       <row-col :span="12">
-        <el-form-item label="所属租户" prop="tenantId">
-          <el-select v-model="form.tenantId" placeholder="请选择所属租户" clearable filterable>
-            <el-option v-for="item in tenantList" :key="item.tenantId" :label="item.tenantName" :value="item.tenantId" />
-          </el-select>
+        <el-form-item label="租户名称" prop="tenantName">
+          <el-input v-model="form.tenantName" placeholder="请输入租户名称" clearable />
         </el-form-item>
-        <el-form-item label="登录账号" prop="account">
-          <el-input v-model="form.account" clearable placeholder="请输入登录账号" />
-        </el-form-item>
-        <!-- <el-form-item label="密码" prop="password">
-          <el-input v-model="form.password" clearable placeholder="请输入密码" @change="passwordChange" />
-        </el-form-item>
-        <el-form-item label="确认密码" prop="password2">
-          <el-input v-model="form.password2" clearable placeholder="再次输入密码" />
-        </el-form-item> -->
-      </row-col>
-      <el-divider content-position="left">
-        详细信息
-      </el-divider>
-      <row-col :span="12">
-        <el-form-item label="用户昵称" prop="name">
-          <el-input v-model="form.name" clearable placeholder="请输入用户昵称" />
-        </el-form-item>
-        <el-form-item label="用户姓名" prop="realName">
-          <el-input v-model="form.realName" clearable placeholder="请输入用户姓名" />
-        </el-form-item>
-        <el-form-item label="手机号码" prop="phone">
-          <el-input v-model="form.phone" clearable placeholder="请输入手机号码" />
-        </el-form-item>
-        <el-form-item label="电子邮箱" prop="email">
-          <el-input v-model="form.email" clearable placeholder="请输入电子邮箱" />
-        </el-form-item>
-        <el-form-item label="用户性别" prop="email">
-          <el-radio-group v-model="form.sex">
-            <el-radio-button :label="1">
-              男
-            </el-radio-button>
-            <el-radio-button :label="2">
-              女
-            </el-radio-button>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="用户生日" prop="birthday">
-          <el-date-picker
-            v-model="form.birthday"
-            type="date"
-            placeholder="请选择生日"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
+        <el-form-item label="租户ID" prop="tenantId">
+          <el-input
+            v-if="type === 'add'"
+            v-model="form.tenantId"
+            placeholder="自动生成"
+            clearable
+            :disabled="true"
+          />
+          <el-input
+            v-else-if="type === 'edit'"
+            v-model="form.tenantId"
+            clearable
+            readonly
           />
         </el-form-item>
-      </row-col>
-      <el-divider content-position="left">
-        职责信息
-      </el-divider>
-      <row-col :span="12">
-        <el-form-item label="用户编号" prop="code">
-          <el-input v-model="form.code" clearable placeholder="请输入用户编号" />
+        <el-form-item label="系统名称" prop="systemName">
+          <el-input v-model="form.systemName" placeholder="请输入系统名称" clearable />
         </el-form-item>
-        <el-form-item label="所属角色" prop="roleId">
-          <el-select
-            v-model="form.roleId"
-            placeholder="请选择所属角色"
-            multiple
-            clearable
-            filterable
-          >
-            <el-option v-for="item in roleList" :key="item.id" :label="item.title" :value="item.id" />
-          </el-select>
+        <el-form-item label="账号额度" prop="expireTime">
+          <el-input v-model="form.expireTime" placeholder="请输入账号额度" clearable />
         </el-form-item>
-        <el-form-item label="所属部门" prop="deptId">
-          <el-tree-select
-            v-model="form.deptId"
-            :data="departmentList"
-            :props="{
-              value: 'id',
-              label: 'title',
-            }"
-            placeholder="请选择所属角色"
-            check-strictly
-            multiple
+        <el-form-item label="绑定域名" prop="domain">
+          <el-input v-model="form.domain" placeholder="请输入绑定域名" clearable />
+        </el-form-item>
+
+        <el-form-item label="联系人" prop="linkman">
+          <el-input v-model="form.linkman" placeholder="请输入联系人" clearable />
+        </el-form-item>
+        <el-form-item label="联系电话" prop="contactNumber">
+          <el-input v-model="form.contactNumber" placeholder="请输入联系电话" clearable />
+        </el-form-item>
+        <el-form-item label="联系地址" prop="address">
+          <el-input v-model="form.address" type="textarea" placeholder="请输入联系地址" clearable />
+        </el-form-item>
+
+        <el-form-item label="系统Logo" prop="systemLogo">
+          <div class="info-user-avatar" @click="openCropper">
+            <el-image style="width: 100px;aspect-ratio: 52 / 60;" :src="form.systemLogo" fit="contain">
+              <template #error>
+                <el-icon>
+                  <IconPicture />
+                </el-icon>
+              </template>
+            </el-image>
+            <el-icon class="info-user-avatar-icon">
+              <Upload style="stroke-width: 3;" />
+            </el-icon>
+          </div>
+        </el-form-item>
+        <el-form-item label="自定义Json串" prop="jsonStr">
+          <el-input
+            v-model="form.jsonStr"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入自定义Json串"
             clearable
-            filterable
           />
-        </el-form-item>
-        <el-form-item label="所属岗位" prop="postId">
-          <el-select
-            v-model="form.postId"
-            placeholder="请选择所属岗位"
-            multiple
-            clearable
-            filterable
-          >
-            <el-option v-for="item in postList" :key="item.id" :label="item.postName" :value="item.id" />
-          </el-select>
         </el-form-item>
       </row-col>
     </el-form>
@@ -185,11 +184,69 @@ onMounted(() => {
       <el-button @click="close">
         取消
       </el-button>
-      <el-button type="primary" @click="save">
+      <el-button type="primary" @click="submit">
         保存
       </el-button>
     </template>
   </el-dialog>
+
+  <EleCropperModal
+    v-model="visible"
+    :preview="false"
+    :src="form.systemLogo"
+    :options="{ aspectRatio: 52 / 60, autoCropArea: 1, viewMode: 1, dragMode: 'move' }"
+    :modal-props="{ destroyOnClose: true }"
+    :to-blob="true"
+    @done="onCrop"
+  />
 </template>
 
-<style scoped lang='scss'></style>
+<style scoped lang='scss'>
+.info-user-avatar {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  cursor: pointer;
+
+  .el-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: var(--el-border);
+    border-radius: var(--el-border-radius-base);
+  }
+
+  .info-user-avatar-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    display: none;
+    font-size: 30px;
+    color: #fff;
+    transform: translate(-50%, -50%);
+  }
+
+  &::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    content: "";
+    background-color: transparent;
+    border-radius: var(--el-border-radius-base);
+    transition: background-color 0.3s;
+  }
+
+  &:hover {
+    .info-user-avatar-icon {
+      display: block;
+    }
+
+    &::after {
+      background-color: rgb(0 0 0 / 40%);
+    }
+  }
+}
+</style>

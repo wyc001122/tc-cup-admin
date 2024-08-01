@@ -19,7 +19,7 @@ declare global {
 /**
  * 传入@/api/modules 下的api函数，返回res.data的类型
  * @example
- * import { menu_list } from '@/api/modules/cup-sys/menu'
+ * import { menu_list } from '@/api/modules/cup-system/menu'
  * const tableData: ExtractAxiosRes<typeof menu_list>['data']
  */
 type ExtractAxiosRes<T> = Awaited<ReturnType<T>>

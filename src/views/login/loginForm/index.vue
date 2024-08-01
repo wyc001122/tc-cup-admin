@@ -7,7 +7,7 @@ import { setCupToken } from '@/utils/token-utils'
 import useLogin from './useLogin'
 import useTenantIdPop from './useTenantIdPop'
 import WujieVue from 'wujie-vue3'
-import { User, Lock, Key } from '@element-plus/icons-vue'
+import { User, Lock, Key, House } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -92,6 +92,7 @@ function submit() {
         clearable
         placeholder="请输入租户ID"
         tabindex="1"
+        :prefix-icon="House"
       />
     </el-form-item>
     <el-form-item prop="username">

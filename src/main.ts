@@ -24,6 +24,8 @@ import { downloadAndInstall } from '@/iconify'
 import icons from '@/iconify/index.json'
 import { setupAllApp } from '@/layouts/Wujie/microViewApp'
 
+import 'ele-admin-plus/es/ele-cropper-modal/style/index'
+
 const app = createApp(App)
 
 app.use(pinia)
